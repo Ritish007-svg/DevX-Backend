@@ -1,34 +1,44 @@
 const express=require('express');
 
 const main=express();
-main.use("/home",(req,res)=>
+
+// This is the key thing you're missing: main.use() matches ANY HTTP method — GET, POST, DELETE, PUT, everything. It only filters by path, not by method. So main.use("/user", ...) matches:
+
+// GET /user ✅
+// POST /user ✅
+// DELETE /user ✅
+
+// All of them — because use() doesn't care what method the request used, only that the path matches.
+
+
+// main.use("/user",(req,res)=>
+// {
+//   res.send("LALALALA!!!");
+// })
+
+main.get("/user",(req,res)=>
 {
-res.send("Hare Krishna Hare Rama Jai jai Shri Radhe!!!! from home page");
+res.send({"firstname":"Mukunda",
+          "lastname":"Murari",
+          "authority":"Supreme"
+})
+console.log("Hulahuu!!!");
+})
+
+main.post("/user",(req,res)=>
+{
+  console.log("Posted in users succesfully!!!!!");
+  res.send("Data succesfully posted to DB!!!!");
+})
+
+main.delete("/user",(req,res)=>
+{
+  console.log("Deleted in users succesfully!!!!!");
+    res.send("Data succesfully posted to DB!!!!");
 })
 
 
-main.use("/test",(req,res)=>
-{
-res.send("Hare Krishna Hare Rama!!!! from test page");
-})
 
-main.use("/hello",(req,res)=>
-{
-  res.send("Hare Krishna from hello world!!!!");
-})
-// ✅ WORKS — nothing above it has caught /hello yet
-main.use((req,res)=>
-{
-res.send("Hare Krishna Hare Rama!!!! from main page");
-})
-// catch-all — matches EVERY path, sends response, no next()
-main.use("/hello",(req,res)=>
-{
-  res.send("Hare Krishna from hello world!!!!");
-})
-
-// ❌ NEVER RUNS — the catch-all above already intercepted 
-// and responded to /hello first. Has nothing to do with listen(). 
 main.listen(3213,()=>
 {
   console.log("Hello from the server!!!!");
