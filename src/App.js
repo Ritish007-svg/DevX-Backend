@@ -16,7 +16,7 @@ const main=express();
 //   res.send("LALALALA!!!");
 // })
 
-main.get("/user",(req,res)=>
+main.get(["/xz","/xyz"],(req,res)=>
 {
 res.send({"firstname":"Mukunda",
           "lastname":"Murari",
@@ -25,19 +25,55 @@ res.send({"firstname":"Mukunda",
 console.log("Hulahuu!!!");
 })
 
-main.post("/user",(req,res)=>
+main.get(/^\/cd+e$/,(req,res)=>
 {
-  console.log("Posted in users succesfully!!!!!");
-  res.send("Data succesfully posted to DB!!!!");
+res.send({"firstname":"Shyam",
+          "lastname":"Ji",
+          "authority":"Supreme"
 })
-
-main.delete("/user",(req,res)=>
-{
-  console.log("Deleted in users succesfully!!!!!");
-    res.send("Data succesfully posted to DB!!!!");
+console.log("Hulahuu!!!");
 })
 
 
+main.get(/^\/ab.*cd$/, (req, res) => {
+    res.send({
+        firstName: "Akshay",
+        lastName: "Saini"
+    });
+});
+
+
+main.get(/ap/, (req, res) => {
+    res.send({
+        firstName: "Vraja",
+        lastName: "Mayapur"
+    });
+});
+
+
+main.get(/.*fly$/, (req, res) => {
+    res.send({
+        firstName: "Jai",
+        lastName: " Prabhupada"
+    });
+});
+
+main.get("/user/:userid/:user_password/:user_info",(req,res)=>
+{
+  res.send({
+        firstName: "Prema",
+        lastName: "Love"
+    });
+    console.log(req.params);
+});
+
+main.get("/user",(req, res) => {
+    res.send({
+        firstName: "Res",
+        lastName: "Query"
+    });
+    console.log(req.query);
+});
 
 main.listen(3213,()=>
 {
