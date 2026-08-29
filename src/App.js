@@ -2,32 +2,32 @@ const express=require('express');
 
 const main=express();
 
-const {authadmin}=require("../MiddleWares/authadmin");
-const { userauth } = require('../MiddleWares/authuser');
 
 
-
-
-main.use("/admin",authadmin);
-
-main.use("/user",userauth,(req,res)=>
+main.use("/user",(req,res)=>
 {
+  throw new Error("Bleh bleh bleh");
 res.send("User data send!!!!");
 })
 
-main.get("/admin/delete",(req,res)=>
+main.use("/",(err,req,res,next)=>
 {
-res.send("ADMIN DELEETD");
+  if(err)
+  {
+    res.status(500).send("Something went wrung!!!!");
+  }
 })
 
-main.post("/user/data",(req,res)=>
+main.use("/admin",(req,res)=>
 {
-res.send("")
-})
-
-main.get("/admin/Data",(req,res)=>
+try{
+  throw new Error("Hula hooo!!!!");
+  res.send("Aint working!!!");
+}
+catch(err)
 {
-res.send("ADMIN DATA RETRIEVED!!!");
+  res.status(500).send("Admin error detected...Pls fix!!!!");
+}
 })
 
 main.listen(3213,()=>
