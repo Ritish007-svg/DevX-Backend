@@ -2,22 +2,33 @@ const express=require('express');
 
 const main=express();
 
-main.use("/user",(req,res,next)=>
-{
-console.log("1st rouite");
-next();
-// res.send("Sewy 1st!!!!");
+const {authadmin}=require("../MiddleWares/authadmin");
+const { userauth } = require('../MiddleWares/authuser');
 
-},[(req,res,next)=>
+
+
+
+main.use("/admin",authadmin);
+
+main.use("/user",userauth,(req,res)=>
 {
-console.log("2ND ROUTE!!!");
-next();
-// res.send("2nd SEWY!!!");
-},(req,res)=>
+res.send("User data send!!!!");
+})
+
+main.get("/admin/delete",(req,res)=>
 {
-console.log("3rd Response!!!!");
-res.send("3rd SEWY!!!!!");
-}])
+res.send("ADMIN DELEETD");
+})
+
+main.post("/user/data",(req,res)=>
+{
+res.send("")
+})
+
+main.get("/admin/Data",(req,res)=>
+{
+res.send("ADMIN DATA RETRIEVED!!!");
+})
 
 main.listen(3213,()=>
 {
