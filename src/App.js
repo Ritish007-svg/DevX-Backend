@@ -6,27 +6,20 @@ const {connect}=require("../src/config/database");
 
 const {User}=require("./models/users");
 
-main.post("/signup",async (req,res)=>
-{
-  const applicant={
-    firstName:"Rama",
-    lastName:"Hari",
-    gender:"Male",
-    age:19,
-    emailId:"krishna@gmail.com",
-    password:"12345987"
-  }
-  //creating a new instance of the user model
-  const user= new User(applicant);
+main.use(express.json());
 
-  try{
-  await user.save();
-  res.send("User added succesfully!!!");
-  }
-  catch(err)
-  {
-    res.status(400).send("Soem error man!!!");
-  }
+main.post("/signup",async(req,res)=>
+{
+const user= new User(req.body);
+
+try{
+await user.save();
+res.send("User added succesfully!!!!");
+}
+catch(err)
+{
+res.status(400).send("Some error occured!!");
+}
 })
 
 connect().then(()=>
