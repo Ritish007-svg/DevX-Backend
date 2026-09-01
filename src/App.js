@@ -2,36 +2,46 @@ const express=require('express');
 
 const main=express();
 
+const {connect}=require("../src/config/database");
 
+const {User}=require("./models/users");
 
-main.use("/user",(req,res)=>
+main.post("/signup",async (req,res)=>
 {
-  throw new Error("Bleh bleh bleh");
-res.send("User data send!!!!");
-})
+  const applicant={
+    firstName:"Rama",
+    lastName:"Hari",
+    gender:"Male",
+    age:19,
+    emailId:"krishna@gmail.com",
+    password:"12345987"
+  }
+  //creating a new instance of the user model
+  const user= new User(applicant);
 
-main.use("/",(err,req,res,next)=>
-{
-  if(err)
+  try{
+  await user.save();
+  res.send("User added succesfully!!!");
+  }
+  catch(err)
   {
-    res.status(500).send("Something went wrung!!!!");
+    res.status(400).send("Soem error man!!!");
   }
 })
 
-main.use("/admin",(req,res)=>
+connect().then(()=>
 {
-try{
-  throw new Error("Hula hooo!!!!");
-  res.send("Aint working!!!");
-}
-catch(err)
-{
-  res.status(500).send("Admin error detected...Pls fix!!!!");
-}
-})
-
+  console.log("Database is connected!!!!!");
+  
 main.listen(3213,()=>
 {
   console.log("Hello from the server!!!!");
 })
+})
+.catch((err)=>
+{
+console.error("ERROR MISLAIGNMENT BRUV!!!",err);
+})
+                                                                                                                                                                                                    
+
 // just starts the server — doesn't affect middleware matching order
