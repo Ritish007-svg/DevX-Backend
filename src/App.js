@@ -22,66 +22,75 @@ res.status(400).send("Some error occured!!");
 }
 })
 
-//Getting one user data first
-
-main.get("/user",async(req,res)=>
+//find by Id and delete
+main.delete("/del",async(req,res)=>
 {
-    const Useremail=req.body.emailId;
-  try{
-  const user=await User.find({emailId:Useremail});
-  if(user.length===0)
+const id=req.body.id;
+try{
+  if(id.length==0)
   {
-    res.status(404).send("User Not found!!!!!");
+    res.send("No id inserted!!!!");
+  }
+  const response=await User.findByIdAndDelete(id);
+  if(!response)
+  {
+    res.send("Id not found in DB!!!!");
   }
   else
   {
-  res.send(user);
+    res.send("User of that id deleted succesfully!!");
   }
+}
+catch(err)
+{
+
+}
+})
+
+//getting user by Id 
+main.get("/id",async(req,res)=>
+{
+  const id=req.body.id;
+  try{
+    if(!id||id.length==0)
+    {
+      res.send("Aint no id shit!!!");
+    }
+    const response=await User.findById(id);
+   if(!response)
+   {
+    res.send("No user with that Id");
+   }
+   else
+   {
+    res.send(response);
+   }
   }
   catch(err)
   {
-      res.status(400).send("Some shitthousery!!!");
+    res.status(404).send("Some error while finding the id!!!");
   }
 })
 
-//Getting one userdata
-main.get("/one",async(req,res)=>
+//updating user 
+main.patch("/update",async(req,res)=>
 {
-const mail=req.body.emailId;
-try{
-const response=await User.findOne({emailId:mail}); //matches the emailId with the mail send from postman body
-// whereas in case of findOne({}) it does not care about the mail it just returns the first user document
-if(!response)
-{
-  res.send("User not present in DB!!!");
-}
-if(mail.length==0)
-{
-  res.send("No user input!!!");
-}
-else
-{
+  const id=req.body.id;
+ try{
+
+  if(id.length==0||!id)
+    {
+     return res.send("Bullshit pass an id!!!!");
+    }    
+  const response=await User.findByIdAndUpdate(id,{"firstName":"MOI MOI SIUU","kaabil Ho":"Haa"},{new:false,upsert:true})
+  console.log(response);
   res.send(response);
-}
-}
-catch(err)
-{
-  res.status(404).send("Some error occured!!!");
-}
-})
-
-//FEED url getting all the users signed in our database
-
-main.get("/feed",async(req,res)=>
-{
-try{
-const allUsers=await (User.find({}))
-res.send(allUsers);
-}
-catch(err)
-{
-  res.status(400).send("Some shitthousery!!!");
-}
+  
+ }
+ catch(err){
+  console.log(err);
+  res.status(404).send("Some error while updating!!!!!");
+ } 
 })
 
 connect().then(()=>
