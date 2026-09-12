@@ -18,7 +18,8 @@ res.send("User added succesfully!!!!");
 }
 catch(err)
 {
-res.status(400).send("Some error occured!!");
+  console.log(err)
+ res.status(400).send(err.message);
 }
 })
 
@@ -78,18 +79,25 @@ main.patch("/update",async(req,res)=>
   const id=req.body.id;
  try{
 
-  if(id.length==0||!id)
+  if(!id)
     {
      return res.send("Bullshit pass an id!!!!");
     }    
-  const response=await User.findByIdAndUpdate(id,{"firstName":"MOI MOI SIUU","kaabil Ho":"Haa"},{new:false,upsert:true})
+  const response=await User.findByIdAndUpdate(id,{"firstName":req.body.firstName,
+    "gender":req.body.gender,
+    "skills":req.body.skills,
+    "bio":req.body.bio},
+    {new:true,
+      upsert:true,
+      runValidators:true,
+      })
   console.log(response);
   res.send(response);
   
  }
  catch(err){
   console.log(err);
-  res.status(404).send("Some error while updating!!!!!");
+  res.status(404).send(err.message);
  } 
 })
 
