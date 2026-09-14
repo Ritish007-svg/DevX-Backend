@@ -1,4 +1,5 @@
 const express=require('express');
+const bcrypt=require('bcrypt')
 
 const main=express();
 
@@ -8,11 +9,20 @@ const {User}=require("./models/users");
 
 main.use(express.json());
 
+//signup
+
 main.post("/signup",async(req,res)=>
 {
 const user= new User(req.body);
 
+if(!(req.body.password.length>2 && req.body.password.length<=10))
+{
+  return res.status(400).send("Password ranges between 2 and 10!!!");
+}
+
 try{
+  const hashedPassword=await bcrypt.hash(req.body.password,10);
+  user.password = hashedPassword;
 await user.save();
 res.send("User added succesfully!!!!");
 }
@@ -23,75 +33,69 @@ catch(err)
 }
 })
 
-//find by Id and delete
-main.delete("/del",async(req,res)=>
+//login
+main.post("/login",async(req,res)=>
 {
-const id=req.body.id;
-try{
-  if(id.length==0)
-  {
-    res.send("No id inserted!!!!");
-  }
-  const response=await User.findByIdAndDelete(id);
-  if(!response)
-  {
-    res.send("Id not found in DB!!!!");
-  }
-  else
-  {
-    res.send("User of that id deleted succesfully!!");
-  }
-}
-catch(err)
-{
-
-}
-})
-
-//getting user by Id 
-main.get("/id",async(req,res)=>
-{
-  const id=req.body.id;
   try{
-    if(!id||id.length==0)
-    {
-      res.send("Aint no id shit!!!");
+  const {emailId,password}=req.body;
+  if(!emailId || !password)
+  {
+    return res.send("Bastard enter your bloody credentials!!!")
+  }
+
+  const check=await User.findOne({emailId}).select("+password");
+
+  if(!check)
+  {
+    return res.status(400).send("Invalid credentials");
+  }
+
+  const isMatch=await bcrypt.compare(password,check.password);
+
+
+    if (!isMatch) {
+      return res.status(400).send("Password did not match!!!!");
     }
-    const response=await User.findById(id);
-   if(!response)
-   {
-    res.send("No user with that Id");
-   }
-   else
-   {
-    res.send(response);
-   }
+
+  // don't send password back, even hashed
+  const {password:pass,...UserWithoutPassword}=check.toObject();
+  res.send(UserWithoutPassword)
   }
   catch(err)
   {
-    res.status(404).send("Some error while finding the id!!!");
+    res.status(404).send(err.message);
   }
 })
 
-//updating user 
-main.patch("/update",async(req,res)=>
-{
-  const id=req.body.id;
- try{
 
-  if(!id)
+//updating user 
+main.patch("/update/:userId",async(req,res)=>
+{
+  const data=req.params?.userId;
+ try{
+  
+
+  if(!data)
     {
      return res.send("Bullshit pass an id!!!!");
     }    
-  const response=await User.findByIdAndUpdate(id,{"firstName":req.body.firstName,
+
+    if (req.body.skills && req.body.skills.length > 10) {
+      return res.status(400).send("Max 10 skills allowed");
+    }
+
+  const response=await User.findByIdAndUpdate(data,{"firstName":req.body.firstName,
     "gender":req.body.gender,
     "skills":req.body.skills,
-    "bio":req.body.bio},
+    "bio":req.body.bio,
+    "photoUrl":req.body.photoUrl,
+    "age":req.body.age},
     {new:true,
       upsert:true,
       runValidators:true,
       })
   console.log(response);
+      
   res.send(response);
   
  }
