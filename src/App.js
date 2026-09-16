@@ -4,6 +4,7 @@ const bcrypt=require('bcrypt')
 
 const main=express();
 const validator=require('validator')
+const {validateSignup}=require('./helpers/validators')
 
 const {connect}=require("../src/config/database");
 
@@ -17,19 +18,10 @@ main.post("/signup",async(req,res)=>
 {
 const user= new User(req.body);
 
-  if (!validator.isStrongPassword(req.body.password)) {   // ✅ checked here — password is still PLAIN TEXT
-    return res.status(400).send("Please enter a strong password");
-  }
-
-
-if(!(req.body.password.length>2 && req.body.password.length<=10))
-{
-  return res.status(400).send("Password ranges between 2 and 10!!!");
-}
-
-
 try{
+  validateSignup(req)
   const hashedPassword=await bcrypt.hash(req.body.password,10);
+  console.log(hashedPassword)
   user.password = hashedPassword;
 await user.save();  // Step E — 🔴 THIS is the only line where Mongoose validators run
 res.send("User added succesfully!!!!");
