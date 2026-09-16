@@ -1,4 +1,6 @@
 const mongoose=require("mongoose");
+const validator=require('validator')
+
 
 const userSchema=new mongoose.Schema({
   firstName:
@@ -6,7 +8,14 @@ const userSchema=new mongoose.Schema({
     type:String,
     required:true,
     minLength:2,
-    maxLength:50
+    maxLength:50,
+    validate(value)
+    {
+      if(!validator.isAlpha(value,"en-US",{ignore:" "}))
+      {
+        throw new Error("First name should only contain letters");
+      }
+    }
   },
 
   lastName:
@@ -22,12 +31,23 @@ const userSchema=new mongoose.Schema({
     required:true,
     unique:true,
     trim:true,
-    match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
+    validate(value){
+      if(!validator.isEmail(value))
+      {
+        throw new Error("Not an email Id!!!!"+value)
+      }
+    }
   },
   password:{
     type: String,
     required:true,
-    
+    validate(value)
+    {
+      if(!validator.isStrongPassword(value))
+      {
+        throw new Error ("Please enter a strong password"+value)
+      }
+    }
   
   },
 
@@ -51,7 +71,15 @@ const userSchema=new mongoose.Schema({
   photoUrl:{
     type:String,
 
-    default:"https://www.vecteezy.com/vector-art/53406424-person-gray-photo-placeholder-man-on-gray-background-avatar-man-icon-anonymous-user-male-no-photo-web-template-default-user-picture-for-social-networks-social-media-resume-forums"
+    default:"https://www.vecteezy.com/vector-art/53406424-person-gray-photo-placeholder-man-on-gray-background-avatar-man-icon-anonymous-user-male-no-photo-web-template-default-user-picture-for-social-networks-social-media-resume-forums",
+
+    validate(value)
+    {
+      if(!validator.isURL(value))
+      {
+        throw new Error ("Photo Url is not VALID!!!!"+value)
+      }
+    }
   },
 
   bio:{
