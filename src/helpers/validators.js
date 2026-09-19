@@ -1,6 +1,6 @@
 const validator=require('validator')
 
-const validateSignup=(req)=>
+const validateSignup=(req,res)=>
 {
 const {emailId,firstName,password}=req.body
 if(!firstName||!emailId||!password)

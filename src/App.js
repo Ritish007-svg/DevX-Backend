@@ -1,6 +1,8 @@
 const express=require('express');
 
 const bcrypt=require('bcrypt')
+const cookieParser = require('cookie-parser');
+const jwt = require("jsonwebtoken");
 
 const main=express();
 const validator=require('validator')
@@ -11,6 +13,7 @@ const {connect}=require("../src/config/database");
 const {User}=require("./models/users");
 
 main.use(express.json());
+main.use(cookieParser());
 
 //signup
 
@@ -19,7 +22,7 @@ main.post("/signup",async(req,res)=>
 const user= new User(req.body);
 
 try{
-  validateSignup(req)
+  validateSignup(req,res)
   const hashedPassword=await bcrypt.hash(req.body.password,10);
   console.log(hashedPassword)
   user.password = hashedPassword;
@@ -50,6 +53,7 @@ main.post("/login",async(req,res)=>
     return res.status(400).send("Invalid credentials");
   }
 
+  
   const isMatch=await bcrypt.compare(password,check.password);
 
 
@@ -59,12 +63,42 @@ main.post("/login",async(req,res)=>
 
   // don't send password back, even hashed
   const {password:pass,...UserWithoutPassword}=check.toObject();
-  res.send(UserWithoutPassword)
+
+  const token=jwt.sign({_id:check._id},"DevX$123")
+  
+  console.log("Token::",token)
+  res.cookie("Token",token)
+  
+
+
+    res.send(UserWithoutPassword)
   }
   catch(err)
   {
     res.status(404).send(err.message);
   }
+})
+
+// cookieCheck
+
+main.get("/cookieCheck",async(req,res)=>
+{
+    const cookie=req.cookies.Token;
+    if(!cookie)
+    {
+      throw new Error("Token is not present!!!!")
+    }
+    //Validating Token
+    const tokenVerification=jwt.verify(cookie,"DevX$123")
+    const {_id}=tokenVerification;
+    console.log("Logged In User is"+_id);
+
+    const user=await User.findById(_id);
+    if(!user)
+    {
+      throw new Error("User not present in DB!!!!!");
+    }
+    res.send(user);
 })
 
 
