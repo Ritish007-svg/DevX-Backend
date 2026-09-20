@@ -55,17 +55,17 @@ main.post("/login",async(req,res)=>
   }
 
   
-  const isMatch=await bcrypt.compare(password,check.password);
+  const ispasswordValid=await check.validatePassword(password)
 
 
-    if (!isMatch) {
+    if (!ispasswordValid) {
       return res.status(400).send("Password did not match!!!!");
     }
 
   // don't send password back, even hashed
   const {password:pass,...UserWithoutPassword}=check.toObject();
 
-  const token=jwt.sign({_id:check._id},"DevX$123",{expiresIn:"1d"})
+  const token=await check.getJWT();
   
   console.log("Token::",token)
   res.cookie("Token",token,
