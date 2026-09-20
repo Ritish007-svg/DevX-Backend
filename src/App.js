@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 
 const main=express();
 const validator=require('validator')
+const {cookieChecker}=require("../MiddleWares/JWTcookie")
 const {validateSignup}=require('./helpers/validators')
 
 const {connect}=require("../src/config/database");
@@ -64,10 +65,13 @@ main.post("/login",async(req,res)=>
   // don't send password back, even hashed
   const {password:pass,...UserWithoutPassword}=check.toObject();
 
-  const token=jwt.sign({_id:check._id},"DevX$123")
+  const token=jwt.sign({_id:check._id},"DevX$123",{expiresIn:"1d"})
   
   console.log("Token::",token)
-  res.cookie("Token",token)
+  res.cookie("Token",token,
+    { expires: new Date(Date.now() + 24 * 60 * 60 * 1000) }
+    
+  )
   
 
 
@@ -81,62 +85,18 @@ main.post("/login",async(req,res)=>
 
 // cookieCheck
 
-main.get("/cookieCheck",async(req,res)=>
+main.get("/profile",cookieChecker,async(req,res)=>
 {
-    const cookie=req.cookies.Token;
-    if(!cookie)
-    {
-      throw new Error("Token is not present!!!!")
-    }
-    //Validating Token
-    const tokenVerification=jwt.verify(cookie,"DevX$123")
-    const {_id}=tokenVerification;
-    console.log("Logged In User is"+_id);
-
-    const user=await User.findById(_id);
-    if(!user)
-    {
-      throw new Error("User not present in DB!!!!!");
-    }
+    
+    const user=req.userdata;
     res.send(user);
 })
 
-
-//updating user 
-main.patch("/update/:userId",async(req,res)=>
+//sendingConnectionReq
+main.post("/connection",cookieChecker,(req,res)=>
 {
-  const data=req.params?.userId;
- try{
-  
-
-  if(!data)
-    {
-     return res.send("Bullshit pass an id!!!!");
-    }    
-
-    if (req.body.skills && req.body.skills.length > 10) {
-      return res.status(400).send("Max 10 skills allowed");
-    }
-
-  const response=await User.findByIdAndUpdate(data,{"firstName":req.body.firstName,
-    "gender":req.body.gender,
-    "skills":req.body.skills,
-    "bio":req.body.bio,
-    "photoUrl":req.body.photoUrl,
-    "age":req.body.age},
-    {new:true,
-      upsert:true,
-      runValidators:true,
-      })
-  console.log(response);
-      
-  res.send(response);
-  
- }
- catch(err){
-  console.log(err);
-  res.status(404).send(err.message);
- } 
+const user=req.userdata;
+res.send(user.firstName+" sent the connection request!!!!")
 })
 
 connect().then(()=>
