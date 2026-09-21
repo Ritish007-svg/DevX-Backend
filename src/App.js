@@ -1,103 +1,22 @@
 const express=require('express');
 
-const bcrypt=require('bcrypt')
 const cookieParser = require('cookie-parser');
-const jwt = require("jsonwebtoken");
 
 const main=express();
-const validator=require('validator')
-const {cookieChecker}=require("../MiddleWares/JWTcookie")
-const {validateSignup}=require('./helpers/validators')
 
 const {connect}=require("../src/config/database");
-
-const {User}=require("./models/users");
 
 main.use(express.json());
 main.use(cookieParser());
 
-//signup
+const authRouter=require("./Routes/auth");
+const reqRouter=require("./Routes/requests");
+const userRouter=require("./Routes/userProfile");
 
-main.post("/signup",async(req,res)=>
-{
-const user= new User(req.body);
+main.use("/",authRouter);
+main.use("/",reqRouter);
+main.use("/",userRouter);
 
-try{
-  validateSignup(req,res)
-  const hashedPassword=await bcrypt.hash(req.body.password,10);
-  console.log(hashedPassword)
-  user.password = hashedPassword;
-await user.save();  // Step E — 🔴 THIS is the only line where Mongoose validators run
-res.send("User added succesfully!!!!");
-}
-catch(err)
-{
-  console.log(err)
- res.status(400).send(err.message);
-}
-})
-
-//login
-main.post("/login",async(req,res)=>
-{
-  try{
-  const {emailId,password}=req.body;
-  if(!emailId || !password)
-  {
-    return res.send("Bastard enter your bloody credentials!!!")
-  }
-
-  const check=await User.findOne({emailId}).select("+password");
-
-  if(!check)
-  {
-    return res.status(400).send("Invalid credentials");
-  }
-
-  
-  const ispasswordValid=await check.validatePassword(password)
-
-
-    if (!ispasswordValid) {
-      return res.status(400).send("Password did not match!!!!");
-    }
-
-  // don't send password back, even hashed
-  const {password:pass,...UserWithoutPassword}=check.toObject();
-
-  const token=await check.getJWT();
-  
-  console.log("Token::",token)
-  res.cookie("Token",token,
-    { expires: new Date(Date.now() + 24 * 60 * 60 * 1000) }
-    
-  )
-  
-
-
-    res.send(UserWithoutPassword)
-  }
-  catch(err)
-  {
-    res.status(404).send(err.message);
-  }
-})
-
-// cookieCheck
-
-main.get("/profile",cookieChecker,async(req,res)=>
-{
-    
-    const user=req.userdata;
-    res.send(user);
-})
-
-//sendingConnectionReq
-main.post("/connection",cookieChecker,(req,res)=>
-{
-const user=req.userdata;
-res.send(user.firstName+" sent the connection request!!!!")
-})
 
 connect().then(()=>
 {
