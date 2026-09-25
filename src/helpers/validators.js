@@ -19,6 +19,19 @@ if(!firstName||!emailId||!password)
 }
 
 
+
+const validateProfileEdit=(req)=>
+{
+  const queries=["firstName","lastName","skills","bio","photoUrl","gender","age"];
+
+  const input=req.body;
+
+  const allowed=Object.keys(input).every((key)=>queries.includes(key));
+  
+
+  return allowed;
+}
 module.exports={
-  validateSignup
+  validateSignup,
+  validateProfileEdit
 }

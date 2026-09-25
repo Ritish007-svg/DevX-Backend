@@ -3,6 +3,7 @@ const authRouter=express.Router();
 const bcrypt=require('bcrypt')
 const {validateSignup}=require('../helpers/validators')
 const {User}=require("../models/users");
+const jwt=require("jsonwebtoken")
 //signup
 
 authRouter.post("/signup",async(req,res)=>
@@ -71,5 +72,28 @@ authRouter.post("/login",async(req,res)=>
   }
 })
 
+authRouter.post("/logout",async(req,res)=>
+{
+  const token=req.cookies.Token;
+  let message="Logged out Succesfully!!!";
+  if(token)
+  {
+    try{
+      const verify=jwt.verify(token,"DevX$123");
+      const user=await User.findById(verify._id);
+      if(user)
+      {
+      message=`${user.firstName} has logged out succesfully!!!!!`;
+      }
+    }
+    catch(err)
+    {
+      return res.status(404).send("Error occured while logging out"+err.message);
+    }
+  }
+
+  res.clearCookie("Token");
+  res.send(message);
+})
 
 module.exports=authRouter;

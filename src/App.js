@@ -12,10 +12,12 @@ main.use(cookieParser());
 const authRouter=require("./Routes/auth");
 const reqRouter=require("./Routes/requests");
 const userRouter=require("./Routes/userProfile");
+const passwordRouter=require("./Routes/Passwords");
 
 main.use("/",authRouter);
 main.use("/",reqRouter);
 main.use("/",userRouter);
+main.use("/",passwordRouter);
 
 
 connect().then(()=>
