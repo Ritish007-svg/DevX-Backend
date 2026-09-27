@@ -11,7 +11,11 @@ authRouter.post("/signup",async(req,res)=>
 const user= new User(req.body);
 
 try{
-  validateSignup(req,res)
+  const isValid= validateSignup(req,res);
+  if(!isValid)
+  {
+    return;
+  }
   const hashedPassword=await bcrypt.hash(req.body.password,10);
   console.log(hashedPassword)
   user.password = hashedPassword;

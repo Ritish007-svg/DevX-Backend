@@ -9,6 +9,7 @@ const userSchema=new mongoose.Schema({
     type:String,
     required:true,
     minLength:2,
+    index:true,
     maxLength:50,
     validate(value)
     {
