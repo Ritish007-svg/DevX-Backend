@@ -35,7 +35,7 @@ if (connectionRequest.fromUser.equals(connectionRequest.toUser)) {
 }
 })
 
-ConnectionSchema.index({ fromUserId: 1, toUserId: 1 });
+ConnectionSchema.index({fromUser: 1, toUser: 1 });
 
 const ConnectionModel=mongoose.model("Connection",ConnectionSchema);
 

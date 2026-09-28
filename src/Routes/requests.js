@@ -10,6 +10,8 @@ const user=req.userdata;
 res.send(user.firstName+" sent the connection request!!!!")
 })
 
+
+
 connectionReq.post("/request/send/:status/:toUserId",cookieChecker,async(req,res)=>
 {
   try{
@@ -61,6 +63,48 @@ res.json({
     res.status(404).send(err.message);
   }
 
+})
+
+connectionReq.post("/request/review/:status/:requestId",cookieChecker,async(req,res)=>
+{
+  
+
+  // Validate the status 
+  // LoggedIn User 
+  // Ritish-->Other person
+  // status Interested 
+  // request Id valid\
+try{
+  const {status,requestId}=req.params;
+  const LoggedIn=req.userdata;
+  const allowedStatus=["Accepted","Rejected"];
+  if(!allowedStatus.includes(status))
+  {
+    throw new Error("Invalid request!!!!");
+  }
+
+  const validConnection=await connection.findOne({
+    _id:requestId,
+    toUser:LoggedIn._id,
+    status:"Interested"
+  })
+
+  if(!validConnection)
+  {
+    res.status(404).send("Connection Invalid get lost bastard!!!!");
+  }
+
+  validConnection.status=status;
+  const data=await validConnection.save();
+  res.json({
+    message:"Connection request "+status,
+    data:data
+  })
+}
+  catch(err)
+  {
+      res.status(404).send(err.message);
+  }
 })
 
 module.exports=connectionReq;
