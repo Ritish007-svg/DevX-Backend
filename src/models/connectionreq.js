@@ -3,7 +3,8 @@ const mongoose=require('mongoose');
 const ConnectionSchema=new mongoose.Schema({
   "fromUser":{
     type:mongoose.Schema.Types.ObjectId,
-    required:true
+    required:true,
+    ref:"User"
   },
 
   "toUser":{

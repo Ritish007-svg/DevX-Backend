@@ -11,6 +11,7 @@ res.send(user.firstName+" sent the connection request!!!!")
 })
 
 
+//Ignored or Interested
 
 connectionReq.post("/request/send/:status/:toUserId",cookieChecker,async(req,res)=>
 {
@@ -65,6 +66,8 @@ res.json({
 
 })
 
+
+//Only if Interetsed then accepted or rejected
 connectionReq.post("/request/review/:status/:requestId",cookieChecker,async(req,res)=>
 {
   
