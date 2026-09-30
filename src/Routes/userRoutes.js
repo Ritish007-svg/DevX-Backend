@@ -28,4 +28,48 @@ catch(err)
   
 }
 })
+
+userReq.get("/users/requests/status",cookieChecker,async(req,res)=>
+{
+  try{
+  const LoggedIn=req.userdata;
+
+  const viewStat=await connection.find({
+   $or:[
+    {fromUser:LoggedIn,status:"Accepted"},
+    {toUser:LoggedIn,status:"Accepted"}
+   ]
+  }).populate("fromUser","firstName age gender bio skills PhotoUrl")
+  .populate("toUser","firstName age gender bio skills PhotoUrl")
+
+  if(!viewStat)
+  {
+    return res.status(404).send("No connections to view!!!!!");
+  }
+
+  console.log(viewStat);
+
+  const info=viewStat.map((row)=>
+  {
+    if(row.fromUser._id.toString()===LoggedIn._id.toString())
+    {
+      return row.toUser;
+    }
+    else
+    {
+      return row.fromUser;
+    }
+  })
+
+
+  res.json({
+    message:"All connections shown of "+LoggedIn.firstName, //how to show the name of the Loggedin user
+    data:info
+  })
+}
+catch(err)
+{
+   res.status(404).send("Error mesaage is here--->",err.message);
+}
+})
 module.exports=userReq;
