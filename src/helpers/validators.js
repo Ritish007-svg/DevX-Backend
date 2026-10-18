@@ -1,25 +1,26 @@
-const validator=require('validator')
+const validator = require("validator");
 
-const validateSignup=(req,res)=>
-{
-const {emailId,firstName,password}=req.body
-if(!firstName||!emailId||!password)
-{
-  throw new Error("Insuffciient credentials to signup!!!")
-}
- if (!validator.isStrongPassword(password)) {   // ✅ checked here — password is still PLAIN TEXT
-    res.status(400).send("Please enter a strong password");
-    return false;
+// CHANGED: no `res` anymore. It only THROWS, and the route's catch sends the reply as JSON.
+const validateSignup = (req) => {
+  const { emailId, firstName, password } = req.body;
+
+  // CHANGED: friendlier text, and trim() so "   " doesn't count as a name
+  if (!firstName?.trim() || !emailId?.trim() || !password) {
+    throw new Error("Please fill all the fields.");
   }
 
-  if(!(password.length>2 && password.length<=10))
-{
-  res.status(400).send("Password ranges between 2 and 10!!!");
-  return false;
-}
-return true;
+  // NEW: email check (the rubbish email in your screenshot stops here)
+  if (!validator.isEmail(emailId)) {
+    throw new Error("Please enter a valid email address.");
+  }
 
-}
+  // CHANGED: throws instead of res.send
+  if (!validator.isStrongPassword(password)) {
+    throw new Error(
+      "Password needs at least 8 characters with uppercase, lowercase, a number and a symbol."
+    );
+  }
+};
 
 
 

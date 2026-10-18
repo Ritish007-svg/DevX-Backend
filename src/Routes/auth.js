@@ -4,30 +4,39 @@ const bcrypt=require('bcrypt')
 const {validateSignup}=require('../helpers/validators')
 const {User}=require("../models/users");
 const jwt=require("jsonwebtoken")
+const isProd = process.env.NODE_ENV === "production";
 //signup
+authRouter.post("/signup", async (req, res) => {
+  try {
+     validateSignup(req);
 
-authRouter.post("/signup",async(req,res)=>
-{
-const user= new User(req.body);
+    const user = new User(req.body);
+    user.password = await bcrypt.hash(req.body.password, 10);
 
-try{
-  const isValid= validateSignup(req,res);
-  if(!isValid)
-  {
-    return;
+    // CHANGED: keep the saved user in a variable
+    const savedUser = await user.save();
+
+    // NEW: token + cookie, exactly like login
+    const token = await savedUser.getJWT();
+    res.cookie("Token", token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+    });
+
+    // CHANGED: savedUser instead of check
+    const { password: pass, ...userWithoutPassword } = savedUser.toObject();
+    res.status(200).json(userWithoutPassword);
+  } catch (err) {
+    console.log(err);
+      // NEW: MongoDB's code for "this email already exists"
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "This email is already registered." });
+    }
+    res.status(400).json({ message: err.message });
   }
-  const hashedPassword=await bcrypt.hash(req.body.password,10);
-  console.log(hashedPassword)
-  user.password = hashedPassword;
-await user.save();  // Step E — 🔴 THIS is the only line where Mongoose validators run
-res.send("User added succesfully!!!!");
-}
-catch(err)
-{
-  console.log(err)
- res.status(400).send(err.message);
-}
-})
+});
 
 
 //login
@@ -37,14 +46,14 @@ authRouter.post("/login",async(req,res)=>
   const {emailId,password}=req.body;
   if(!emailId || !password)
   {
-    return res.send("Bastard enter your bloody credentials!!!")
+    return res.status(400).json({ message: "Please enter email and password." });
   }
 
   const check=await User.findOne({emailId}).select("+password");
 
   if(!check)
   {
-    return res.status(400).send("Invalid credentials");
+    return res.status(401).json({ message: "Invalid email or password." });
   }
 
   
@@ -52,7 +61,7 @@ authRouter.post("/login",async(req,res)=>
 
 
     if (!ispasswordValid) {
-      return res.status(400).send("Password did not match!!!!");
+   return res.status(401).json({ message: "Invalid email or password." });
     }
 
   // don't send password back, even hashed
@@ -60,9 +69,13 @@ authRouter.post("/login",async(req,res)=>
 
   const token=await check.getJWT();
   
-  console.log("Token::",token)
+
   res.cookie("Token",token,
-    { expires: new Date(Date.now() + 24 * 60 * 60 * 1000) }
+    { expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? "none" : "lax",
+    }
     
   )
   
@@ -72,7 +85,8 @@ authRouter.post("/login",async(req,res)=>
   }
   catch(err)
   {
-    res.status(404).send(err.message);
+    console.error(err);
+  res.status(500).json({ message: "Something went wrong. Try again." });
   }
 })
 
@@ -83,7 +97,7 @@ authRouter.post("/logout",async(req,res)=>
   if(token)
   {
     try{
-      const verify=jwt.verify(token,"DevX$123");
+      const verify=jwt.verify(token, process.env.JWT_SECRET);
       const user=await User.findById(verify._id);
       if(user)
       {

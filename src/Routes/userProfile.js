@@ -8,7 +8,7 @@ userProfile.get("/profile/view",cookieChecker,async(req,res)=>
 {
     
     const user=req.userdata;
-    res.send(user);
+   res.status(200).json(user);
 })
 
 

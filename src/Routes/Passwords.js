@@ -44,7 +44,8 @@ if(!valid)
 {
     throw new Error("Something went wrong!!!!");
 }
-const resetToken=jwt.sign({_id:valid._id},"DevX$123",{expiresIn:"15m"})
+const resetToken=jwt.sign({_id:valid._id},process.env.JWT_SECRET,{expiresIn:"15m"})
+//  const verify=jwt.verify(token, process.env.JWT_SECRET);
 const resetLink = `http://localhost:3213/resetPassword/${resetToken}`;
 console.log(resetLink);
  res.send("If that email exists, a reset link has been sent.");
