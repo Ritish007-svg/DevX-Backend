@@ -70,7 +70,8 @@ const userSchema=new mongoose.Schema({
 
     validate(value)
     {
-      if(!validator.isURL(value))
+      
+      if (!validator.isURL(value, { require_tld: false }))
       {
         throw new Error ("Photo Url is not VALID!!!!"+value)
       }

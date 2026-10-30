@@ -90,28 +90,27 @@ authRouter.post("/login",async(req,res)=>
   }
 })
 
-authRouter.post("/logout",async(req,res)=>
-{
-  const token=req.cookies.Token;
-  let message="Logged out Succesfully!!!";
-  if(token)
-  {
-    try{
-      const verify=jwt.verify(token, process.env.JWT_SECRET);
-      const user=await User.findById(verify._id);
-      if(user)
-      {
-      message=`${user.firstName} has logged out succesfully!!!!!`;
+authRouter.post("/logout", async (req, res) => {
+  // Default message, used if we can't find the user
+  let message = "Logged out Successfully!!!";
+
+  // Try to get the user's name for the message. If the token is bad, ignore it
+  try {
+    const token = req.cookies.Token;
+    if (token) {
+      const verify = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(verify._id);
+      if (user) {
+        message = `${user.firstName} has logged out successfully!!!!!`;
       }
     }
-    catch(err)
-    {
-      return res.status(404).send("Error occured while logging out"+err.message);
-    }
+  } catch (err) {
+    // Ignore the error: we still want to clear the cookie below
   }
 
+  // Always clear the cookie, no matter what happened above
   res.clearCookie("Token");
   res.send(message);
-})
+});
 
 module.exports=authRouter;

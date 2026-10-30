@@ -127,7 +127,7 @@ const feedUsers=await User.find({
     {_id:{$ne:LoggedIn._id}}
 
   ]
-}).select("firstName age gender bio skills photoUrl").sort({ _id: 1 }).skip(skip).limit(limit);
+}).select("firstName lastName age gender bio skills photoUrl").sort({ _id: 1 }).skip(skip).limit(limit);
 
 res.send(feedUsers);
 
