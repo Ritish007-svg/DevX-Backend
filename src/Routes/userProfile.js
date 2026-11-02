@@ -4,12 +4,16 @@ const {cookieChecker}=require("../../MiddleWares/JWTcookie");
 const {validateProfileEdit}=require("../helpers/validators");
 const {User}=require("../models/users");
 const jwt=require("jsonwebtoken");
-userProfile.get("/profile/view",cookieChecker,async(req,res)=>
-{
-    
-    const user=req.userdata;
-   res.status(200).json(user);
-})
+userProfile.get("/profile/view", cookieChecker, async (req, res) => {
+  // keeps: the logged-in user that cookieChecker found
+  const user = req.userdata;
+  // ADDED: turn the mongoose document into a plain object we can edit
+  const safeUser = user.toObject();
+  // ADDED: remove the password hash before sending
+  delete safeUser.password;
+  // CHANGED: send the safe copy instead of the full document
+  res.status(200).json(safeUser);
+});
 
 
 userProfile.patch("/profile/update",cookieChecker,async(req,res)=>
@@ -22,15 +26,19 @@ userProfile.patch("/profile/update",cookieChecker,async(req,res)=>
     }
 
     const loggedIn=req.userdata;
-    console.log(loggedIn);
     Object.keys(req.body).forEach((key)=>(loggedIn[key]=req.body[key]));
-    console.log(loggedIn);
     await loggedIn.save();
-    res.json(
-        {
-        message:`${loggedIn.firstName} updated succesfully!!!!`,
-        data:loggedIn
-    })
+
+    // ADDED: turn the mongoose document into a plain object we can edit
+const safeUser = loggedIn.toObject();
+// ADDED: remove the password hash before sending
+delete safeUser.password;
+
+res.json({
+  message: `${loggedIn.firstName} updated succesfully!!!!`,
+  // CHANGED: send the safe copy instead of the full document
+  data: safeUser,
+});
 }
 catch(err)
 {

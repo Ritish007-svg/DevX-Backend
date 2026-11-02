@@ -63,7 +63,7 @@ Password.patch("/resetPassword/:token",async(req,res)=>
 const {token}=req.params;
 const {newPassword}=req.body;
 
-const decoded=jwt.verify(token,"DevX$123");
+const decoded=jwt.verify(token,process.env.JWT_SECRET);
 console.log("Decoded Id",decoded._id);
 const user=await User.findById(decoded._id);
 if(!user)

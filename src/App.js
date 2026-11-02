@@ -29,7 +29,9 @@ main.use("/",userProfileRouter);
 main.use("/",passwordRouter);
 main.use("/",userRouter);
 
-
+// TEMPORARY: prints the connection string with the password hidden, delete it after checking
+// TEMPORARY: prints only the variable names that start with MONGO or JWT, delete it after checking
+console.log(Object.keys(process.env).filter((k) => k.startsWith("MONGO") || k.startsWith("JWT")));
 connect().then(()=>
 {
   console.log("Database is connected!!!!!");

@@ -2,6 +2,7 @@ const jwt=require("jsonwebtoken")
 
 const {User}=require("../src/models/users");
 
+require("dotenv").config();
 const cookieChecker=async(req,res,next)=>
 {
   try{
@@ -11,7 +12,8 @@ const cookieChecker=async(req,res,next)=>
     throw new Error("Token aint there!!!!")
   }
 
-  const decode=await jwt.verify(Token,"DevX$123");
+// CHANGED: reads the secret from .env instead of writing it in the code
+const decode=await jwt.verify(Token,process.env.JWT_SECRET);
   const {_id}=decode;
 
   const userdet=await User.findById(_id);

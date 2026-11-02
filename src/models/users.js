@@ -101,7 +101,8 @@ userSchema.methods.getJWT=async function()
 {
   const user=this;
   
-    const token=jwt.sign({_id:user._id},"DevX$123",{expiresIn:"1d"});
+  // CHANGED: signs the token with the secret from .env instead of the old key written in the code
+const token=jwt.sign({_id:user._id},process.env.JWT_SECRET,{expiresIn:"1d"});
     return token;
 }
 
