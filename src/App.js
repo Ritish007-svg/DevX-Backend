@@ -10,8 +10,14 @@ const main=express();
 const {connect}=require("../src/config/database");
 
 main.use(cors({
-  origin:"http://localhost:5173",
-    credentials: true,
+  // Allow the Vite dev server on any localhost port (5173, 5174, ...)
+  origin: (origin, callback) => {
+    if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
 }));
 main.use(express.json());
 main.use(cookieParser());

@@ -78,7 +78,10 @@ connectionReq.post("/request/review/:status/:requestId",cookieChecker,async(req,
   // status Interested 
   // request Id valid\
 try{
-  const {status,requestId}=req.params;
+  const {requestId}=req.params;
+  // Normalize case so "accepted" / "ACCEPTED" -> "Accepted"
+  const raw=req.params.status;
+  const status=raw.charAt(0).toUpperCase()+raw.slice(1).toLowerCase();
   const LoggedIn=req.userdata;
   const allowedStatus=["Accepted","Rejected"];
   if(!allowedStatus.includes(status))
@@ -94,7 +97,16 @@ try{
 
   if(!validConnection)
   {
-    res.status(404).send("Connection Invalid get lost bastard!!!!");
+    const any=await connection.findById(requestId);
+    let reason="No connection exists with this id.";
+    if(any)
+    {
+      if(String(any.toUser)!==String(LoggedIn._id))
+        reason=`You are not the receiver. This request is for toUser=${any.toUser}, but you are logged in as ${LoggedIn._id}. Log in as the receiver.`;
+      else
+        reason=`Status is "${any.status}", not "Interested".`;
+    }
+    return res.status(404).send("Connection Invalid: "+reason);
   }
 
   validConnection.status=status;

@@ -66,8 +66,6 @@ const userSchema=new mongoose.Schema({
   photoUrl:{
     type:String,
 
-    default:"https://www.vecteezy.com/vector-art/53406424-person-gray-photo-placeholder-man-on-gray-background-avatar-man-icon-anonymous-user-male-no-photo-web-template-default-user-picture-for-social-networks-social-media-resume-forums",
-
     validate(value)
     {
       

@@ -2,11 +2,16 @@ const validator = require("validator");
 
 // CHANGED: no `res` anymore. It only THROWS, and the route's catch sends the reply as JSON.
 const validateSignup = (req) => {
-  const { emailId, firstName, password } = req.body;
+  const { emailId, firstName, password, gender } = req.body;
 
   // CHANGED: friendlier text, and trim() so "   " doesn't count as a name
   if (!firstName?.trim() || !emailId?.trim() || !password) {
     throw new Error("Please fill all the fields.");
+  }
+
+  // NEW: gender is required and must be one of the three allowed values
+  if (!["male", "female", "others"].includes(gender)) {
+    throw new Error("Please select a gender.");
   }
 
   // NEW: email check (the rubbish email in your screenshot stops here)

@@ -44,13 +44,6 @@ userReq.get("/users/requests/status",cookieChecker,async(req,res)=>
   }).populate("fromUser","firstName age gender bio skills photoUrl")
   .populate("toUser","firstName age gender bio skills photoUrl")
 
-  if(viewStat.length ==0)
-  {
-    return res.status(404).send("No connections to view!!!!!");
-  }
-
-
-
   const info=viewStat.map((row)=>
   {
     if(row.fromUser._id.toString()===LoggedIn._id.toString())
