@@ -9,18 +9,21 @@ const main=express();
 
 const {connect}=require("../src/config/database");
 
-main.use(cors({
-  // Allow the Vite dev server on any localhost port (5173, 5174, ...)
-  origin: (origin, callback) => {
-    if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
-      return callback(null, true);
-    }
-    callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-}));
+// Allowed frontend addresses: your local one, plus any live ones listed in FRONTEND_URL in .env (comma-separated)
+const allowedOrigins = ["http://localhost:5173", ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(",") : [])];
+
+main.use(
+  cors({
+    // Only accept requests coming from the addresses in the list above
+    origin: allowedOrigins,
+    // Let the browser send and receive the login cookie
+    credentials: true,
+  })
+);
 main.use(express.json());
 main.use(cookieParser());
+
+
 
 const authRouter=require("./Routes/auth");
 const reqRouter=require("./Routes/requests");
